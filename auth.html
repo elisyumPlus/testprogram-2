@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Giriş / Kayıt</title>
+
+  <!-- Tema uygula + açık oturum guard -->
+  <script>
+    (function(){
+      var t=localStorage.getItem('ui-theme');
+      if(t) document.documentElement.setAttribute('data-theme', t);
+      var s=localStorage.getItem('session:user');
+      if(s){
+        try{
+          var meta=JSON.parse(localStorage.getItem('users:meta')||'{}')||{};
+          if(meta[s] && meta[s].banned){
+            alert('Hesabınız banlı.'); localStorage.removeItem('session:user');
+          }else{
+            location.replace('home.html');
+          }
+        }catch(e){}
+      }
+    })();
+  </script>
+
+  <style>
+    :root{
+      --bg-1:#e7edf6; --bg-2:#dbe3ef; --card:#f7f9fd; --text:#1e293b; --muted:#74829a;
+      --input:#eef2f8; --primary:#4a90e2; --sun:#fdb813; --moon:#ffffff;
+      --shadow-1:#cfd7e6; --shadow-2:#ffffff; --ring:rgba(74,144,226,.45);
+      --switch-track: linear-gradient(135deg,#ffffff,#e9effa);
+    }
+    html[data-theme="dark"]{
+      --bg-1:#0e1424; --bg-2:#141c2f; --card:#1a2232; --text:#e7edf6; --muted:#9aa6b2;
+      --input:#111a2c; --primary:#4a90e2; --shadow-1:rgba(0,0,0,.55); --shadow-2:rgba(255,255,255,.06);
+      --ring:rgba(74,144,226,.6);
+      --switch-track: linear-gradient(135deg,#0b1222,#1b2640);
+    }
+    *{ box-sizing:border-box }
+    body{
+      margin:0; min-height:100dvh; display:grid; place-items:center; color:var(--text);
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -10%, var(--bg-2), transparent 60%),
+                  radial-gradient(900px 700px at 100% 100%, var(--bg-2), transparent 55%),
+                  linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      transition: background .35s ease, color .2s ease;
+      overflow:hidden;
+    }
+    a{ color:var(--primary); text-decoration:none; font-weight:600 }
+    a:hover{ text-decoration:underline }
+
+    .container{
+      width:380px; background:var(--card); padding:2.6rem; border-radius:24px; text-align:center;
+      box-shadow:18px 18px 40px var(--shadow-1), -18px -18px 40px var(--shadow-2);
+      position:relative;
+    }
+    h2{ margin:0 0 .5rem; font-weight:800 } .sub{ margin:0 0 1.2rem; color:var(--muted) }
+    .field{ margin:.6rem 0 }
+    input, select{
+      width:100%; padding:1rem; border:0; border-radius:14px; background:var(--input); color:var(--text);
+      box-shadow: inset 4px 4px 8px var(--shadow-1), inset -4px -4px 8px var(--shadow-2);
+      outline:none; font-size:.98rem;
+    }
+    input:focus, select:focus{ box-shadow: inset 4px 4px 8px var(--shadow-1), inset -4px -4px 8px var(--shadow-2), 0 0 0 3px var(--ring) }
+    button.primary{
+      width:100%; padding:1rem; margin-top:.8rem; border:0; border-radius:14px;
+      background:linear-gradient(180deg,#6fb0ff,#4a90e2); color:#fff; font-weight:800; letter-spacing:.2px; cursor:pointer;
+      box-shadow:10px 10px 20px rgba(0,0,0,.12), -8px -8px 16px rgba(255,255,255,.5);
+    }
+    .muted{ margin-top:1rem; color:var(--muted) }
+    .hidden{ display:none }
+
+    /* Tema anahtarı (üst sağ) */
+    .theme-switch{
+      position: fixed; top:16px; right:18px; width:92px; height:44px; border-radius:999px; border:0;
+      display:flex; align-items:center; justify-content:space-between; padding:0 12px; cursor:pointer;
+      background: var(--switch-track);
+      box-shadow:10px 10px 24px var(--shadow-1), -10px -10px 24px var(--shadow-2);
+    }
+    .knob{ position:absolute; left:4px; top:4px; width:36px; height:36px; border-radius:50%; background:var(--card);
+      box-shadow:6px 6px 16px var(--shadow-1), -6px -6px 16px var(--shadow-2); transition: transform .32s cubic-bezier(.4,0,.2,1) }
+    html[data-theme="dark"] .knob{ transform: translateX(48px) }
+    .icon{ width:22px; height:22px; display:grid; place-items:center }
+    .icon.sun svg{ fill:#fdb813 } .icon.moon svg{ fill:#fff }
+
+    .gender-row{ display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:.4rem }
+    .gender-row label{ display:flex; gap:6px; align-items:center; background:var(--input); padding:.5rem .7rem; border-radius:999px; cursor:pointer }
+  </style>
+</head>
+<body>
+  <!-- Tema anahtarı -->
+  <button id="themeSwitch" class="theme-switch" aria-label="Gece moduna geç" aria-pressed="false">
+    <span class="icon sun" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg></span>
+    <span class="icon moon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7.2 7.2 0 0 0 9.8 9.8z"/></svg></span>
+    <span class="knob" aria-hidden="true"></span>
+  </button>
+
+  <main class="container">
+    <!-- Login -->
+    <section id="loginBox">
+      <h2>Tekrardan Hoş Geldin!</h2>
+      <p class="sub">Devam etmek için giriş yap</p>
+      <div class="field"><input id="loginUser" type="email" placeholder="E-posta" autocomplete="username"></div>
+      <div class="field"><input id="loginPass" type="password" placeholder="Şifre" autocomplete="current-password"></div>
+      <button class="primary" id="loginBtn">Giriş Yap</button>
+      <p class="muted">Hesabın yok mu? <a href="#" onclick="toggleForm();return false;">Kayıt Ol</a></p>
+    </section>
+
+    <!-- Register -->
+    <section id="registerBox" class="hidden">
+      <h2>Hesap Oluştur</h2>
+      <p class="sub">Hızlıca kayıt ol</p>
+      <div class="field"><input id="regUser" type="email" placeholder="E-posta" autocomplete="username"></div>
+      <div class="field"><input id="regPass" type="password" placeholder="Şifre (min 6)" autocomplete="new-password"></div>
+
+      <!-- Cinsiyet seçimi -->
+      <div class="gender-row">
+        <label><input type="radio" name="regGender" value="male" checked> Erkek</label>
+        <label><input type="radio" name="regGender" value="female"> Kız</label>
+        <label><input type="radio" name="regGender" value="custom"> Özel</label>
+      </div>
+      <div class="field hidden" id="regGenderCustomWrap">
+        <input id="regGenderCustom" type="text" placeholder="Cinsiyet (Özel)">
+      </div>
+
+      <button class="primary" id="registerBtn">Kayıt Ol</button>
+      <p class="muted">Zaten hesabın var mı? <a href="#" onclick="toggleForm();return false;">Giriş Yap</a></p>
+    </section>
+  </main>
+
+  <!-- Firebase (CDN, modüler SDK) -->
+  <script type="module">
+    /* === Firebase configini DOLDUR === */
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID",
+    };
+
+    /* SDK importları */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged,
+      createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import {
+      getFirestore, doc, setDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    /* App başlat */
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    /* === Tema === */
+    const THEME_KEY='ui-theme';
+    const switchBtn=document.getElementById('themeSwitch');
+    function applyTheme(theme){
+      const isDark=theme==='dark';
+      document.documentElement.setAttribute('data-theme',theme);
+      localStorage.setItem(THEME_KEY,theme);
+      switchBtn.setAttribute('aria-pressed', String(isDark));
+      switchBtn.setAttribute('aria-label', isDark?'Gündüz moduna geç':'Gece moduna geç');
+    }
+    (function initTheme(){
+      const saved=localStorage.getItem(THEME_KEY);
+      if(saved==='dark'||saved==='light') applyTheme(saved);
+      else applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    })();
+    switchBtn.addEventListener('click',()=>{ const cur=document.documentElement.getAttribute('data-theme'); applyTheme(cur==='dark'?'light':'dark'); });
+
+    /* === UI & yardımcılar === */
+    const loginBox=document.getElementById('loginBox'), registerBox=document.getElementById('registerBox');
+    function toggleForm(){ loginBox.classList.toggle('hidden'); registerBox.classList.toggle('hidden'); }
+
+    document.querySelectorAll('input[name="regGender"]').forEach(r=>{
+      r.addEventListener('change', ()=>{
+        const v=document.querySelector('input[name="regGender"]:checked').value;
+        document.getElementById('regGenderCustomWrap').classList.toggle('hidden', v!=='custom');
+      });
+    });
+
+    /* === Firebase: Register === */
+    async function register(){
+      const email=document.getElementById('regUser').value.trim();
+      const password=document.getElementById('regPass').value.trim();
+      const g=document.querySelector('input[name="regGender"]:checked').value;
+      const gCustom=(document.getElementById('regGenderCustom').value||'').trim();
+
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Geçerli e-posta girin.');
+      if(password.length<6) return alert('Şifre en az 6 karakter olmalı.');
+      if(g==='custom' && !gCustom) return alert('Lütfen özel cinsiyet metni yazın.');
+
+      try{
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Kullanıcı meta verisi Firestore'a
+        const gender = g;
+        const genderText = g==='male'?'Erkek' : g==='female'?'Kız' : ('Özel: '+gCustom);
+        const avatar = g==='male' ? '👨' : g==='female' ? '👩' : '⭐';
+
+        await setDoc(doc(db, "users", cred.user.uid), {
+          email,
+          gender, genderText, avatar,
+          role: "user",
+          createdAt: serverTimestamp(),
+          loginCount: 0
+        }, { merge: true });
+
+        alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+        toggleForm();
+      }catch(err){
+        const map={
+          "auth/email-already-in-use":"Bu e-posta zaten kayıtlı.",
+          "auth/invalid-email":"Geçerli bir e-posta adresi girin.",
+          "auth/weak-password":"Şifre çok zayıf (min 6)."
+        };
+        alert(map[err.code] || ('Kayıt hatası: '+err.message));
+      }
+    }
+
+    /* === Firebase: Login === */
+    async function login(){
+      const email=document.getElementById('loginUser').value.trim();
+      const password=document.getElementById('loginPass').value.trim();
+      if(!email || !password) return alert('Lütfen e-posta ve şifre girin.');
+
+      try{
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // Basit session işareti (senin guard'ın için)
+        localStorage.setItem('session:user', cred.user.uid);
+        location.href='home.html';
+      }catch(err){
+        const map={
+          "auth/user-not-found":"Kullanıcı bulunamadı.",
+          "auth/wrong-password":"Şifre hatalı.",
+          "auth/invalid-email":"Geçerli bir e-posta adresi girin."
+        };
+        alert(map[err.code] || ('Giriş hatası: '+err.message));
+      }
+    }
+
+    // Buton bağla + Enter
+    document.getElementById('registerBtn').addEventListener('click', register);
+    document.getElementById('loginBtn').addEventListener('click', login);
+    ['loginUser','loginPass','regUser','regPass','regGenderCustom'].forEach(id=>{
+      const el=document.getElementById(id); el && el.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){ id.startsWith('reg')?register():login(); }
+      });
+    });
+
+    // Opsiyonel: Auth state izleme (debug)
+    onAuthStateChanged(auth, (user)=>{ /* console.log('auth state', user?.uid); */ });
+  </script>
+</body>
+</html>
