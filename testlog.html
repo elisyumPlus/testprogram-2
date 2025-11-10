@@ -5,17 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Firebase Auth + Firestore Demo</title>
   <style>
-    body{font-family:system-ui,Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 16px}
-    form{display:grid;gap:8px;margin:16px 0}
-    input,button{padding:10px;font-size:16px}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .card{border:1px solid #ddd;border-radius:10px;padding:16px;margin:12px 0}
+    :root{color-scheme:light dark}
+    body{font-family:system-ui,Arial,sans-serif;max-width:720px;margin:40px auto;padding:0 16px}
+    h1{margin-bottom:8px}
+    .card{border:1px solid #ddd;border-radius:12px;padding:16px;margin:14px 0}
+    form{display:grid;gap:10px;margin-top:8px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    input,button{padding:10px;font-size:16px;border-radius:10px;border:1px solid #ccc}
+    button{cursor:pointer}
+    pre{white-space:pre-wrap}
     code{background:#f6f8fa;padding:2px 6px;border-radius:6px}
   </style>
 </head>
 <body>
-  <h1>Firebase: Kayıt & Giriş & Profil</h1>
+  <h1>Firebase: Kayıt • Giriş • Profil</h1>
+  <p>Profil verileri Firestore’da <code>/users/{uid}</code> dokümanında tutulur.</p>
 
+  <!-- Kayıt -->
   <div class="card">
     <h2>1) Kayıt Ol</h2>
     <form id="signupForm">
@@ -28,6 +34,7 @@
     </form>
   </div>
 
+  <!-- Giriş -->
   <div class="card">
     <h2>2) Giriş Yap</h2>
     <form id="signinForm">
@@ -35,41 +42,52 @@
         <input type="email" id="siEmail" placeholder="E-posta" required />
         <input type="password" id="siPassword" placeholder="Şifre" required />
       </div>
-      <button type="submit">Giriş Yap</button>
-      <button type="button" id="sendReset">Şifre Sıfırlama Maili Gönder</button>
+      <div class="row">
+        <button type="submit">Giriş Yap</button>
+        <button type="button" id="sendReset">Şifre Sıfırlama Maili</button>
+      </div>
     </form>
   </div>
 
+  <!-- Çıkış -->
   <div class="card">
     <h2>3) Çıkış</h2>
     <button id="signOutBtn">Çıkış Yap</button>
   </div>
 
+  <!-- Profil -->
   <div class="card">
-    <h2>4) Profil Bilgileri (Firestore: <code>/users/{uid}</code>)</h2>
+    <h2>4) Profil (Firestore: <code>/users/{uid}</code>)</h2>
     <form id="profileForm">
       <input type="text" id="pfFullName" placeholder="Ad Soyad" />
       <input type="text" id="pfBio" placeholder="Kısa bio" />
-      <button type="submit">Profilimi Kaydet/Güncelle</button>
-      <button type="button" id="loadProfile">Profilimi Yükle</button>
+      <div class="row">
+        <button type="submit">Kaydet/Güncelle</button>
+        <button type="button" id="loadProfile">Profilimi Yükle</button>
+      </div>
     </form>
   </div>
 
+  <!-- Durum -->
   <div class="card">
     <h2>Oturum Durumu</h2>
-    <pre id="status">...</pre>
+    <pre id="status">Yükleniyor…</pre>
   </div>
 
+  <!-- Firebase SDK: CDN (v10) -->
   <script type="module">
-    // 1) Konsoldan aldığın config ile DEĞİŞTİR
+    // 🔴 BURAYI KENDİ PROJE AYARLARINLA DOLDUR
     const firebaseConfig = {
-  apiKey: "AIzaSyBlaglZNm3X2jQRrOPNA9Q6D3nCvjG5VjU",
-  authDomain: "nrussystem.firebaseapp.com",
-  projectId: "nrussystem",
-  appId: "1:907157259049:web:7a4f4b547803345ce92d38",
-};
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID",
+      // measurementId opsiyonel
+    };
 
-    // 2) Modüler SDK importları (v9+)
+    // Modüler SDK importları
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import {
       getAuth, onAuthStateChanged,
@@ -80,7 +98,7 @@
       getFirestore, doc, setDoc, getDoc
     } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    // 3) Başlat
+    // Başlat
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -88,12 +106,12 @@
     const $ = (s) => document.querySelector(s);
     const statusEl = $("#status");
 
-    // 4) Oturum değişimlerini izle (UI'ya yaz)
+    // Oturum dinleme
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const token = await user.getIdTokenResult();
         statusEl.textContent =
-          `Giriş yapıldı:
+`Giriş yapıldı:
 uid: ${user.uid}
 email: ${user.email}
 emailVerified: ${user.emailVerified}
@@ -103,32 +121,28 @@ claims: ${JSON.stringify(token.claims)}`;
       }
     });
 
-    // 5) Kayıt ol
+    // Kayıt
     $("#signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = $("#suEmail").value.trim();
       const password = $("#suPassword").value;
-      const displayName = $("#suDisplayName").value.trim();
+      const displayName = $("#suDisplayName").value.trim() || null;
 
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
-        if (displayName) {
-          await updateProfile(cred.user, { displayName });
-        }
-        // İlk kullanıcı dokümanı
+        if (displayName) await updateProfile(cred.user, { displayName });
         await setDoc(doc(db, "users", cred.user.uid), {
           email,
-          displayName: displayName || null,
+          displayName,
           createdAt: new Date().toISOString()
         }, { merge: true });
-
         alert("Kayıt başarılı! Giriş yapıldı.");
       } catch (err) {
         alert("Kayıt hatası: " + err.message);
       }
     });
 
-    // 6) Giriş yap
+    // Giriş
     $("#signinForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = $("#siEmail").value.trim();
@@ -141,7 +155,7 @@ claims: ${JSON.stringify(token.claims)}`;
       }
     });
 
-    // 7) Şifre sıfırlama
+    // Şifre sıfırlama
     $("#sendReset").addEventListener("click", async () => {
       const email = $("#siEmail").value.trim();
       if (!email) return alert("Lütfen e-posta gir.");
@@ -153,13 +167,13 @@ claims: ${JSON.stringify(token.claims)}`;
       }
     });
 
-    // 8) Çıkış
+    // Çıkış
     $("#signOutBtn").addEventListener("click", async () => {
       await signOut(auth);
       alert("Çıkış yapıldı.");
     });
 
-    // 9) Profil kaydet/güncelle
+    // Profil kaydet/güncelle
     $("#profileForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = auth.currentUser;
@@ -177,7 +191,7 @@ claims: ${JSON.stringify(token.claims)}`;
       }
     });
 
-    // 10) Profil yükle
+    // Profil yükle
     $("#loadProfile").addEventListener("click", async () => {
       const user = auth.currentUser;
       if (!user) return alert("Önce giriş yap.");
@@ -189,7 +203,7 @@ claims: ${JSON.stringify(token.claims)}`;
           $("#pfBio").value = data.bio || "";
           alert("Profil yüklendi.");
         } else {
-          alert("Profil yok (önce kaydedin).");
+          alert("Profil bulunamadı, önce kaydedin.");
         }
       } catch (err) {
         alert("Yükleme hatası: " + err.message);
