@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Opera GX Suspension Notice</title>
+  <title>NruS system</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto:wght@300;400;700&display=swap');
 
@@ -12,7 +12,7 @@
       --gx-red-soft:#ff2d6f;
       --gx-bg:#0c0c0f;
       --gx-panel:#141421;
-      --auto-close-ms: 3000; /* modal otomatik kapanma süresi (ms) */
+      --auto-close-ms: 3000; 
     }
 
     *{box-sizing:border-box}
@@ -40,7 +40,7 @@
       backdrop-filter: blur(2px);
     }
 
-    /* TEHLİKE AMBLEMİ */
+   
     .badge-wrap{
       width:140px;height:160px;margin:0 auto 22px;
       filter: drop-shadow(0 0 22px rgba(255,0,76,.55)) drop-shadow(0 0 8px rgba(255,0,76,.75));
@@ -76,7 +76,7 @@
 
     footer{ position:fixed;bottom:10px;left:0;right:0;text-align:center; color:#646477;font-size:12px;pointer-events:none; }
 
-    /* ---------- UYARI MODALI ---------- */
+    
     .modal-backdrop{
       position:fixed; inset:0; background:rgba(0,0,0,.7);
       display:none; align-items:center; justify-content:center; z-index:1000;
@@ -115,7 +115,7 @@
     }
     @keyframes progressFill{ from{ width:0% } to{ width:100% } }
 
-    /* ---------- GİZLİ TUŞ: normal yazı gibi görünsün ---------- */
+    
     .stealth-link{
       color: inherit;           /* metin rengi neyse o */
       text-decoration: none;    /* alt çizgi yok */
@@ -128,7 +128,7 @@
 </head>
 <body>
   <div class="card">
-    <!-- DAHA SERT & TEHLİKELİ AMBLEM (INLINE SVG) -->
+ 
     <div class="badge-wrap" aria-hidden="true">
       <svg class="badge-glow badge-shake" viewBox="0 0 200 220" width="100%" height="100%" role="img">
         <defs>
@@ -159,13 +159,13 @@
       </svg>
     </div>
 
-    <h1>YOU'VE BEEN PERMANENTLY SUSPENDED FROM USING OPERA GX</h1>
+    <h1>YOU'VE BEEN PERMANENTLY SUSPENDED FROM USING NRUS SYSTEM</h1>
     <p>
-      Your internet search history has determined that you are a Valorant player. Since we do not allow these types of gamers on our browser, your
-      <span class="stealth-link" id="ogxStealth" aria-label="(gizli tuş)">Opera GX</span>
-      installation has been suspended indefinitely. 
+      Your internet search history has determined that you have either used or helped spread harmful software. Since our system does not allow such players/developers, your
+      <span class="stealth-link" id="ogxStealth" aria-label="(gizli tuş)">NruS System</span>
+   installation has been permanently suspended.
       <br><br>
-      Please return once you have uninstalled the game or have gone outside for 2 hours. Your access may be restored, but your dignity will remain forever tarnished.
+      Please try again after uninstalling the software or exiting it for at least 2 hours. Your access may be restored, but your honor will remain forever tainted.
     </p>
 
     <div class="buttons">
@@ -174,14 +174,14 @@
     </div>
   </div>
 
-  <footer>© 2025 Opera GX – totally serious notice 😈</footer>
+  <footer>© 2025 NruS System</footer>
 
   <!-- Uyarı Modalı -->
   <div class="modal-backdrop" id="backdrop" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
     <div class="modal" id="modal">
       <div class="progress"><span id="progressFill"></span></div>
       <h2 id="alertTitle">APPEAL UYARISI</h2>
-      <p>EN KISA SÜREDE SANA YARDIMCI OLMAYACAĞIZ KENDİ BAŞININ ÇARESİNE BAK</p>
+      <p>EN KISA SÜREDE SANA YARDIMCI OLMAYACAĞIZ KENDİ BAŞININ ÇARESİNE BAK =D</p>
       <button class="ok" id="okBtn">Tamam</button>
     </div>
   </div>
