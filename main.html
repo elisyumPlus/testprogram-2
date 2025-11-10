@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Opera GX Suspension Notice</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto:wght@300;400;700&display=swap');
+
+    :root{
+      --gx-red:#ff004c;
+      --gx-red-soft:#ff2d6f;
+      --gx-bg:#0c0c0f;
+      --gx-panel:#141421;
+      --auto-close-ms: 3000; /* modal otomatik kapanma süresi (ms) */
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, #1a1a2e 0%, #0c0c0f 60%, #06060a 100%),
+        var(--gx-bg);
+      color:#fff;
+      font-family:'Roboto',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial,sans-serif;
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
+    }
+
+    .card{
+      width:min(680px,92vw);
+      background:linear-gradient(180deg, rgba(255,0,76,0.06), rgba(255,0,76,0.02));
+      border:2px solid rgba(255,0,76,0.45);
+      border-radius:18px;
+      padding:42px 36px;
+      text-align:center;
+      position:relative;
+      box-shadow:0 0 24px rgba(255,0,76,0.35), inset 0 0 40px rgba(255,0,76,0.06);
+      backdrop-filter: blur(2px);
+    }
+
+    /* TEHLİKE AMBLEMİ */
+    .badge-wrap{
+      width:140px;height:160px;margin:0 auto 22px;
+      filter: drop-shadow(0 0 22px rgba(255,0,76,.55)) drop-shadow(0 0 8px rgba(255,0,76,.75));
+      animation: floaty 4s ease-in-out infinite;
+    }
+    @keyframes floaty{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
+    .badge-glow{ animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse{ 0%,100%{ opacity:.9; filter: drop-shadow(0 0 10px rgba(255,0,76,.7)); } 50%{ opacity:1; filter: drop-shadow(0 0 26px rgba(255,0,76,1)); } }
+    .badge-shake{ animation: shake 5s cubic-bezier(.36,.07,.19,.97) infinite; }
+    @keyframes shake{
+      0%, 93%, 100% { transform: translate(0,0) rotate(0) }
+      94% { transform: translate(-1px,1px) rotate(-1deg) }
+      95% { transform: translate(2px,-1px) rotate(1.4deg) }
+      96% { transform: translate(-2px,1px) rotate(-1.2deg) }
+      97% { transform: translate(1px,-1px) rotate(.8deg) }
+      98% { transform: translate(-1px,1px) rotate(-.6deg) }
+      99% { transform: translate(1px,-1px) rotate(.4deg) }
+    }
+
+    h1{ font-family:'Orbitron',sans-serif; text-transform:uppercase; font-size:20px; letter-spacing:.8px; margin:10px 0 18px; }
+    p{ color:#cfcfd6;font-size:14px;line-height:1.7;margin:0 auto;max-width:52ch; }
+
+    .buttons{ display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap; }
+    .btn{
+      background:#1c1c26;border:1px solid #3a3a46;color:#fff;
+      padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;
+      transition:transform .08s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover{ transform: translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,.35) }
+    .btn:active{ transform: translateY(0) }
+    .btn-cta{ background:var(--gx-red); border-color:var(--gx-red); box-shadow:0 0 16px rgba(255,0,76,.45); }
+    .btn-cta:hover{ background:var(--gx-red-soft) }
+
+    footer{ position:fixed;bottom:10px;left:0;right:0;text-align:center; color:#646477;font-size:12px;pointer-events:none; }
+
+    /* ---------- UYARI MODALI ---------- */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.7);
+      display:none; align-items:center; justify-content:center; z-index:1000;
+      animation: fadeIn .2s ease-out;
+    }
+    .show{ display:flex !important; }
+    @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+
+    .modal{
+      width:min(620px,92vw); background:#151522; border:2px solid var(--gx-red);
+      border-radius:14px; padding:24px 20px; text-align:center;
+      box-shadow:0 0 28px rgba(255,0,76,.45);
+    }
+    .modal h2{ margin:0 0 12px; font-size:18px; font-family:'Orbitron', sans-serif; color:#fff; }
+    .modal p{ margin:0 12px 18px; color:#ffd5e2; font-weight:900; letter-spacing:.3px; }
+
+    .modal .ok{
+      background:#1e1e2a; border:1px solid #3a3a46; color:#fff;
+      padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:700;
+    }
+
+    .modal.shake-strong{ animation: strongShake .5s cubic-bezier(.36,.07,.19,.97) 0s 1 both; }
+    @keyframes strongShake{
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    .progress{
+      height:6px; background:rgba(255,0,76,.2); border-radius:8px; overflow:hidden; margin:0 12px 14px;
+    }
+    .progress > span{
+      display:block; height:100%; background:var(--gx-red);
+      animation: progressFill linear forwards;
+    }
+    @keyframes progressFill{ from{ width:0% } to{ width:100% } }
+
+    /* ---------- GİZLİ TUŞ: normal yazı gibi görünsün ---------- */
+    .stealth-link{
+      color: inherit;           /* metin rengi neyse o */
+      text-decoration: none;    /* alt çizgi yok */
+      font-weight: inherit;     /* kalınlık paragrafla aynı */
+      cursor: text;             /* imleç metin imleci */
+    }
+    /* seçim/kopyalama normal çalışsın */
+    .stealth-link::selection{ background: rgba(255,0,76,.35); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- DAHA SERT & TEHLİKELİ AMBLEM (INLINE SVG) -->
+    <div class="badge-wrap" aria-hidden="true">
+      <svg class="badge-glow badge-shake" viewBox="0 0 200 220" width="100%" height="100%" role="img">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#ff1f5a"/>
+            <stop offset="100%" stop-color="#9a002f"/>
+          </linearGradient>
+          <filter id="innerGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <path d="M100 8 L171 48 L171 148 L100 212 L29 148 L29 48 Z" fill="url(#g1)" stroke="#ff004c" stroke-width="6" />
+        <path d="M100 24 L157 56 L157 142 L100 196 L43 142 L43 56 Z" fill="#0f0e15" stroke="#ff2a62" stroke-width="3" filter="url(#innerGlow)"/>
+        <g transform="translate(0,-6)">
+          <path d="M100 68 C 75 68, 64 86, 64 104 C 64 122, 74 132, 74 142 L 78 150 L 122 150 L 126 142 C 126 132, 136 122, 136 104 C 136 86, 125 68, 100 68 Z" fill="#f2f2f4" stroke="#0b0b10" stroke-width="3"/>
+          <path d="M82 104 l20 -10 l-2 18 l-18 -8 z" fill="#0b0b10"/>
+          <path d="M118 104 l-20 -10 l2 18 l18 -8 z" fill="#0b0b10"/>
+          <rect x="88" y="132" width="24" height="6" rx="1" fill="#0b0b10"/>
+          <rect x="86" y="138" width="8" height="10" rx="1" fill="#0b0b10"/>
+          <rect x="98" y="138" width="8" height="10" rx="1" fill="#0b0b10"/>
+          <rect x="110" y="138" width="8" height="10" rx="1" fill="#0b0b10"/>
+        </g>
+        <g stroke="#ff004c" stroke-width="3" stroke-linecap="round">
+          <path d="M36 88 l18 8 -10 4 14 8" fill="none"/>
+          <path d="M164 88 l-18 8 10 4 -14 8" fill="none"/>
+        </g>
+      </svg>
+    </div>
+
+    <h1>YOU'VE BEEN PERMANENTLY SUSPENDED FROM USING OPERA GX</h1>
+    <p>
+      Your internet search history has determined that you are a Valorant player. Since we do not allow these types of gamers on our browser, your
+      <span class="stealth-link" id="ogxStealth" aria-label="(gizli tuş)">Opera GX</span>
+      installation has been suspended indefinitely. 
+      <br><br>
+      Please return once you have uninstalled the game or have gone outside for 2 hours. Your access may be restored, but your dignity will remain forever tarnished.
+    </p>
+
+    <div class="buttons">
+      <button class="btn" id="appealBtn">Appeal</button>
+      <button class="btn btn-cta" onclick="alert('Uninstall initialized... just kidding 😈')">Uninstall</button>
+    </div>
+  </div>
+
+  <footer>© 2025 Opera GX – totally serious notice 😈</footer>
+
+  <!-- Uyarı Modalı -->
+  <div class="modal-backdrop" id="backdrop" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
+    <div class="modal" id="modal">
+      <div class="progress"><span id="progressFill"></span></div>
+      <h2 id="alertTitle">APPEAL UYARISI</h2>
+      <p>EN KISA SÜREDE SANA YARDIMCI OLMAYACAĞIZ KENDİ BAŞININ ÇARESİNE BAK</p>
+      <button class="ok" id="okBtn">Tamam</button>
+    </div>
+  </div>
+
+  <script>
+    // ==== Titreşim (destek varsa) ====
+    function vibrateWarn() {
+      if (navigator.vibrate) {
+        navigator.vibrate([120, 60, 120]);
+      }
+    }
+
+    // ==== Modal kontrolü ====
+    const appealBtn    = document.getElementById('appealBtn');
+    const backdrop     = document.getElementById('backdrop');
+    const okBtn        = document.getElementById('okBtn');
+    const modal        = document.getElementById('modal');
+    const progressFill = document.getElementById('progressFill');
+
+    let autoCloseTimer = null;
+
+    function openModal() {
+      const ms = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--auto-close-ms')) || 3000;
+      progressFill.style.animationDuration = ms + 'ms';
+      progressFill.style.width = '0%';
+      void progressFill.offsetWidth; // reset
+      progressFill.style.animationName = 'progressFill';
+
+      backdrop.classList.add('show');
+
+      // güçlü shake animasyonu
+      modal.classList.remove('shake-strong');
+      void modal.offsetWidth;
+      modal.classList.add('shake-strong');
+
+      vibrateWarn();
+
+      clearTimeout(autoCloseTimer);
+      autoCloseTimer = setTimeout(closeModal, ms);
+    }
+
+    function closeModal() {
+      backdrop.classList.remove('show');
+      progressFill.style.animationName = 'none';
+      clearTimeout(autoCloseTimer);
+    }
+
+    appealBtn.addEventListener('click', openModal);
+    okBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+
+    // ==== GİZLİ TUŞ: normal metin tıklanınca YouTube'a git ====
+    document.getElementById('ogxStealth').addEventListener('click', () => {
+      window.open('https://www.youtube.com/', '_blank', 'noopener,noreferrer');
+    });
+  </script>
+</body>
+</html>
