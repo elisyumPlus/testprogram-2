@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Giriş / Kayıt</title>
+  <style>
+    :root{color-scheme:light dark}
+    body{font-family:system-ui,Arial,sans-serif;max-width:720px;margin:40px auto;padding:0 16px}
+    .card{border:1px solid #ddd;border-radius:12px;padding:16px;margin:14px 0}
+    form{display:grid;gap:10px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    input,button{padding:10px;font-size:16px;border-radius:10px;border:1px solid #ccc}
+    button{cursor:pointer}
+    .hidden{display:none}
+    .muted{color:#6b7280}
+  </style>
+</head>
+<body>
+  <h1>Firebase: Kayıt • Giriş</h1>
+
+  <section id="loginBox" class="card">
+    <h2>Giriş Yap</h2>
+    <form>
+      <div class="row">
+        <input id="loginUser" type="email" placeholder="E-posta" autocomplete="username" required />
+        <input id="loginPass" type="password" placeholder="Şifre" autocomplete="current-password" required />
+      </div>
+      <button id="loginBtn" type="button">Giriş Yap</button>
+    </form>
+    <p class="muted">Hesabın yok mu? <a href="#" onclick="toggleForm();return false;">Kayıt Ol</a></p>
+  </section>
+
+  <section id="registerBox" class="card hidden">
+    <h2>Kayıt Ol</h2>
+    <form>
+      <div class="row">
+        <input id="regUser" type="email" placeholder="E-posta" autocomplete="username" required />
+        <input id="regPass" type="password" placeholder="Şifre (min 6)" autocomplete="new-password" required />
+      </div>
+      <div>
+        <label><input type="radio" name="regGender" value="male" checked> Erkek</label>
+        <label><input type="radio" name="regGender" value="female"> Kız</label>
+        <label><input type="radio" name="regGender" value="custom"> Özel</label>
+      </div>
+      <div id="regGenderCustomWrap" class="hidden">
+        <input id="regGenderCustom" type="text" placeholder="Cinsiyet (Özel)">
+      </div>
+      <button id="registerBtn" type="button">Kayıt Ol</button>
+    </form>
+    <p class="muted">Zaten hesabın var mı? <a href="#" onclick="toggleForm();return false;">Giriş Yap</a></p>
+  </section>
+
+  <script type="module">
+    /* ==== Firebase configini DOLDUR ==== */
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID",
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged,
+      createUserWithEmailAndPassword, signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import {
+      getFirestore, doc, setDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Girişliler direkt home.html'e
+    onAuthStateChanged(auth, (user) => { if (user) location.replace('home.html'); });
+
+    const loginBox = document.getElementById('loginBox');
+    const registerBox = document.getElementById('registerBox');
+    function toggleForm(){ loginBox.classList.toggle('hidden'); registerBox.classList.toggle('hidden'); }
+    window.toggleForm = toggleForm;
+
+    document.querySelectorAll('input[name="regGender"]').forEach(r=>{
+      r.addEventListener('change', ()=>{
+        const v=document.querySelector('input[name="regGender"]:checked').value;
+        document.getElementById('regGenderCustomWrap').classList.toggle('hidden', v!=='custom');
+      });
+    });
+
+    async function register(){
+      const email = document.getElementById('regUser').value.trim();
+      const password = document.getElementById('regPass').value.trim();
+      const g = document.querySelector('input[name="regGender"]:checked').value;
+      const gCustom = (document.getElementById('regGenderCustom').value||'').trim();
+
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Geçerli e-posta girin.');
+      if(password.length < 6) return alert('Şifre en az 6 karakter olmalı.');
+      if(g==='custom' && !gCustom) return alert('Özel cinsiyet metni yazın.');
+
+      try{
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Firestore'a basit profil
+        const gender = g;
+        const genderText = g==='male'?'Erkek': g==='female'?'Kız' : ('Özel: '+gCustom);
+        const avatar = g==='male'?'👨': g==='female'?'👩':'⭐';
+        await setDoc(doc(db, "users", cred.user.uid), {
+          email, gender, genderText, avatar, role: "user",
+          createdAt: serverTimestamp(), loginCount: 0
+        }, { merge: true });
+
+        // İSTERSEN: kayıt olur olmaz home.html'e al
+        localStorage.setItem('session:user', cred.user.uid);
+        location.replace('home.html');
+      }catch(err){
+        const map={
+          "auth/email-already-in-use":"Bu e-posta zaten kayıtlı.",
+          "auth/invalid-email":"Geçerli bir e-posta adresi girin.",
+          "auth/weak-password":"Şifre çok zayıf (min 6)."
+        };
+        alert(map[err.code] || ('Kayıt hatası: '+err.message));
+      }
+    }
+
+    async function login(){
+      const email = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value.trim();
+      if(!email || !password) return alert('E-posta ve şifre girin.');
+
+      try{
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // home.html bunu kontrol ediyor
+        localStorage.setItem('session:user', cred.user.uid);
+        location.replace('home.html');
+      }catch(err){
+        const map={
+          "auth/user-not-found":"Kullanıcı bulunamadı.",
+          "auth/wrong-password":"Şifre hatalı.",
+          "auth/invalid-email":"Geçerli bir e-posta girin."
+        };
+        alert(map[err.code] || ('Giriş hatası: '+err.message));
+      }
+    }
+
+    document.getElementById('registerBtn').addEventListener('click', register);
+    document.getElementById('loginBtn').addEventListener('click', login);
+    ['loginUser','loginPass','regUser','regPass','regGenderCustom'].forEach(id=>{
+      const el=document.getElementById(id); el && el.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){ id.startsWith('reg')?register():login(); }
+      });
+    });
+  </script>
+</body>
+</html>
